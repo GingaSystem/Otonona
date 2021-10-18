@@ -7,10 +7,11 @@ using UnityEngine.UI;
 public class Mic : MonoBehaviour {
         private NoteNameDetector notename;
         private Text text;
-        //public AudioClip sound;
-        
+    //public AudioClip sound;
+    AudioSource aud;
+
     void Start() {
-        AudioSource aud = GetComponent<AudioSource>();
+        aud = GetComponent<AudioSource>();
         text = GetComponentInChildren<Text>();
         //Debug.Log(text);
         notename = new NoteNameDetector();
@@ -26,7 +27,7 @@ public class Mic : MonoBehaviour {
        
       if(Time.frameCount%10 != 0){return;}
     float[] spectrum = new float[1024];
-    AudioListener.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
+    aud.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
     var maxIndex = 0;
     var maxValue = 0.0f;
     var freq = 0.0f;
