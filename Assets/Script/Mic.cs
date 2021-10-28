@@ -11,6 +11,7 @@ public class Mic : MonoBehaviour
     AudioSource aud; //マイクの音を読み取ったり内部再生する用
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips;
+    private String lastNotename;
 
     void Start()
     {
@@ -27,11 +28,10 @@ public class Mic : MonoBehaviour
 
         text.text = "読み取り中";
     }
+
     void Update()
     {
-
-
-        if (Time.frameCount % 50 != 0) { return; }
+        if (Time.frameCount % 10 != 0) { return; }
         Debug.Log("UPDATE!");
         float[] spectrum = new float[1024];
         aud.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
@@ -49,24 +49,35 @@ public class Mic : MonoBehaviour
                 // maxValue が最も大きい周波数成分の値で、
                 // maxIndex がそのインデックス。欲しいのはこっち。
             }
+        }
 
-            //Debug.Log("max: " + maxIndex);
-            //Debug.Log("Audio:" + AudioSettings.outputSampleRate);
-            //Debug.Log("spectrum: " + spectrum.Length);
-            freq = maxIndex * AudioSettings.outputSampleRate / 2 / spectrum.Length;
-            Debug.Log("freq:" + freq);
-            try
+
+        if (maxValue < 0.04)
+        {
+            Debug.Log("無音: maxValue:" + maxValue);
+            return;
+        }
+
+        //Debug.Log("Audio:" + AudioSettings.outputSampleRate);
+        //Debug.Log("spectrum: " + spectrum.Length);
+        freq = maxIndex * AudioSettings.outputSampleRate / 2 / spectrum.Length;
+        //Debug.Log("freq:" + freq);
+        try
+        {
+            String currentNoteName = notename.GetNoteName(freq);
+            Debug.Log("notename" + currentNoteName);
+
+            if (lastNotename != currentNoteName)
             {
-                Debug.Log("notename" + notename.GetNoteName(freq));
-                text.text = notename.GetNoteName(freq);
+                text.text = currentNoteName;
+                lastNotename = currentNoteName;
                 notename.soundPlay(freq, this);
                 //freqに0が入ると例外が起こる(なぜ0が多いのか)
-
             }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
         }
 
     }
@@ -95,6 +106,7 @@ public class NoteNameDetector
         var noteNumber = calculateNoteNumberFromFrequency(freq);
         var note = noteNumber % 12; //0〜11の数字が入る
         mic.aud2.clip = mic.clips[note];
+        mic.aud2.Stop();
         mic.aud2.PlayOneShot(mic.aud2.clip);
         Debug.Log("soundPlay: " + noteNames[note]);
 
