@@ -52,7 +52,7 @@ public class Mic : MonoBehaviour
         }
 
 
-        if (maxValue < 0.04)
+        if (maxValue < 0.035)
         {
             Debug.Log("無音: maxValue:" + maxValue);
             return;
