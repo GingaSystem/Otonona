@@ -26,7 +26,7 @@ public class Mic : MonoBehaviour
         //aud2.Play();
         //aud.PlayOneShot(sound);
 
-        text.text = "読み取り中";
+        text.text = "";
     }
 
     void Update()
@@ -69,7 +69,7 @@ public class Mic : MonoBehaviour
 
             if (lastNotename != currentNoteName)
             {
-                text.text = currentNoteName;
+                text.text = text.text + currentNoteName;
                 lastNotename = currentNoteName;
                 notename.soundPlay(freq, this);
                 //freqに0が入ると例外が起こる(なぜ0が多いのか)
