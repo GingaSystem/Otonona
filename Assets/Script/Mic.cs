@@ -40,6 +40,12 @@ public class Mic : MonoBehaviour
             CaptureScreenShot("ScreenShot" + n.ToString() + ".png");
             n++;
         }
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Debug.Log("Enter");
+            GameObject sc = GameObject.Find("ShareController");
+            sc.GetComponent<ShareController>().Share(); //ここなにやってるのだろ
+        }
         if (Time.frameCount % 10 != 0) { return; }
         Debug.Log("UPDATE!");
         float[] spectrum = new float[1024];
