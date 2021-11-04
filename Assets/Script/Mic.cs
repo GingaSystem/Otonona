@@ -13,6 +13,8 @@ public class Mic : MonoBehaviour
     public AudioClip[] clips;
     private String lastNotename;
 
+    private int n = 0;
+
     void Start()
     {
         aud = GetComponent<AudioSource>();
@@ -31,6 +33,13 @@ public class Mic : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Space key");
+            // スクリーンショットを保存
+            CaptureScreenShot("ScreenShot" + n.ToString() + ".png");
+            n++;
+        }
         if (Time.frameCount % 10 != 0) { return; }
         Debug.Log("UPDATE!");
         float[] spectrum = new float[1024];
@@ -80,6 +89,15 @@ public class Mic : MonoBehaviour
             Debug.Log(e);
         }
 
+
+
+
+    }
+    // 画面全体のスクリーンショットを保存する
+    void CaptureScreenShot(string filePath)
+    {
+        ScreenCapture.CaptureScreenshot(filePath);
+        Debug.Log("☆CaptureScreenShot");
     }
 
 }
