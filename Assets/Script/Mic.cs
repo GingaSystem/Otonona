@@ -42,7 +42,7 @@ public class Mic : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            Debug.Log("Enter");
+            Debug.Log("UpArrow");
             GameObject sc = GameObject.Find("ShareController");
             sc.GetComponent<ShareController>().Share(); //ここなにやってるのだろ
         }
