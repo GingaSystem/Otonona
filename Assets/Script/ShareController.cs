@@ -29,7 +29,7 @@ public class ShareController : MonoBehaviour
         }
 
         // 投稿する
-        string tweetText = "ついったー投稿";
+        string tweetText = "";
         string tweetURL = "";
         SocialConnector.SocialConnector.Share(tweetText, tweetURL, imgPath);
     }
