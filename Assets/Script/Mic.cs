@@ -2,8 +2,10 @@ using UnityEngine;
 using System.Collections;
 using System;
 using UnityEngine.UI;
-
-
+//todo
+//同じ音の連続でも無音が挟まった時にはもう一度歌う
+//音の追加
+//変化が大きかった部分に注目
 public class Mic : MonoBehaviour
 {
     private NoteNameDetector notename;
