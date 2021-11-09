@@ -90,7 +90,7 @@ public class Mic : MonoBehaviour
                 text.text = text.text + currentNoteName;
                 lastNotename = currentNoteName;
                 notename.soundPlay(freq, this);
-                //freqに0が入ると例外が起こる(なぜ0が多いのか)
+                //freqに0が入ると例外が起こる
             }
         }
         catch (Exception e)
@@ -107,6 +107,10 @@ public class Mic : MonoBehaviour
     {
         ScreenCapture.CaptureScreenshot(filePath);
         Debug.Log("☆CaptureScreenShot");
+    }
+    public void Clear()
+    {
+        text.text = "";
     }
 
 }
