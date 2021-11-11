@@ -52,8 +52,8 @@ public class ShareController : MonoBehaviour
 
 
         // 投稿する
-        string tweetText = "";
-        string tweetURL = "";
+        string tweetText = "Otononaで撮ったよ! #オトノナ ";
+        string tweetURL = null;
         SocialConnector.SocialConnector.Share(tweetText, tweetURL, imgPath);
 
 
