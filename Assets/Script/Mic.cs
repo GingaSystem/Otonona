@@ -12,9 +12,13 @@ public class Mic : MonoBehaviour
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips; //3オクターブ分のクリップを入れておく
 
+    public double minSound;
+
     private String lastNotename;
 
     private int n = 0;
+
+
 
     void Start()
     {
@@ -67,7 +71,7 @@ public class Mic : MonoBehaviour
             }
         }
 
-        var minSound = 0.035;
+        //minSound = 0.035;
         Boolean isMuon = false;
         if (maxValue < minSound)
         {
