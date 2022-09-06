@@ -6,9 +6,16 @@ using UnityEngine.UI;
 
 public class ShareController : MonoBehaviour
 {
+    public GameObject button;
+    public GameObject button2;
+
     public void Share()
     {
+        //スクリーンショットを撮る時ボタンを消したい
+        button.SetActive(false);
+        button2.SetActive(false);
         StartCoroutine(_Share());
+
     }
 
     public IEnumerator _Share()
@@ -21,16 +28,34 @@ public class ShareController : MonoBehaviour
         //スクリーンショットを撮影
         ScreenCapture.CaptureScreenshot("image.png");
 
+
+
         // 撮影画像の保存が完了するまで待機
         while (true)
         {
-            if (File.Exists(imgPath)) break;
+            if (File.Exists(imgPath))
+            {
+                Debug.Log("ボタン戻す");
+                button.SetActive(true);
+                button2.SetActive(true);
+                break;
+            }
+
             yield return null;
+            Debug.Log("ボタン戻す");
+            button.SetActive(true);
+            button2.SetActive(true);
+
+
         }
 
+
+
         // 投稿する
-        string tweetText = "";
-        string tweetURL = "";
+        string tweetText = "Otononaで撮ったよ! #オトノナ ";
+        string tweetURL = null;
         SocialConnector.SocialConnector.Share(tweetText, tweetURL, imgPath);
+
+
     }
 }
