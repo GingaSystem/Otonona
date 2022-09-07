@@ -13,6 +13,7 @@ public class Mic : MonoBehaviour
     AudioSource aud; //マイクの音を読み取ったり内部再生する用
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips; //3オクターブ分のクリップを入れておく
+    public Slider slider;
 
     public double minSound;
 
@@ -26,7 +27,8 @@ public class Mic : MonoBehaviour
     {
         aud = GetComponent<AudioSource>();
         text = GetComponentInChildren<Text>();
-        //Debug.Log(text);
+        slider = GetComponentInChildren<Slider>();
+        //Debug.Log(slider.value);
         notename = new NoteNameDetector();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, 1, 44100);
@@ -73,7 +75,8 @@ public class Mic : MonoBehaviour
             }
         }
 
-        //minSound = 0.035;
+        minSound = slider.value;
+        Debug.Log("Slider: "+ slider.value);
         Boolean isMuon = false;
         if (maxValue < minSound)
         {
@@ -88,14 +91,14 @@ public class Mic : MonoBehaviour
         //Debug.Log("freq:" + freq);
         try
         {
-            String currentNoteName = notename.GetNoteName(freq);
+            String currentNoteName = notename.GetNoteName(freq,maxValue);
             Debug.Log("notename" + currentNoteName);
 
             if (lastNotename != currentNoteName) //lastNoteの音量がminSoundより小さかった時にも動かしたい
             {
                 text.text = text.text + currentNoteName;
                 lastNotename = currentNoteName;
-                notename.soundPlay(freq, this);
+                notename.soundPlay(freq, this, maxValue);
                 //freqに0が入ると例外が起こる
             }
         }
@@ -126,7 +129,7 @@ public class NoteNameDetector
     Mic mic;
     private string[] noteNames = { "ド", "ド♯", "レ", "レ♯", "ミ", "ファ", "ファ♯", "ソ", "ソ♯", "ラ", "ラ♯", "シ" };
 
-    public string GetNoteName(float freq)
+    public string GetNoteName(float freq, float maxValue)
     {
         //Debug.Log("GetNoteName: "+freq);
         // 周波数からMIDIノートナンバーを計算
@@ -135,6 +138,7 @@ public class NoteNameDetector
         // 0:C - 11:B に収める
         var note = noteNumber % 12; //商がオクターブに対応している
         Debug.Log("3オクターブ外 note:" + note);
+        Debug.Log("判定済みMaxValue:"+ maxValue);
         // 0:C～11:Bに該当する音名を返す
         return noteNames[note];
 
@@ -144,7 +148,7 @@ public class NoteNameDetector
     //入っている時→実際の音の高さで歌う。入っていない時→12で割ったあまり
     //12で割った時：C2=4...0,C3=5...0,C4...6...0
     //C2を0番目の要素としたいから48をひけばおっけー？
-    public void soundPlay(float freq, Mic mic)
+    public void soundPlay(float freq, Mic mic, float maxValue)
     {
         var noteNumber = calculateNoteNumberFromFrequency(freq);
         if (noteNumber <= 83 && noteNumber >= 48)
@@ -156,6 +160,7 @@ public class NoteNameDetector
             mic.aud2.Stop();
             mic.aud2.PlayOneShot(mic.aud2.clip);
             Debug.Log("soundPlay: " + noteNames[note]);
+            Debug.Log("判定済みMaxValue:"+ maxValue);
         }
         else
         {
