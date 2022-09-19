@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 //todo
 //同じ音の連続でも無音が挟まった時にはもう一度歌う
 //音の追加
@@ -179,5 +181,9 @@ public class NoteNameDetector
     private int calculateNoteNumberFromFrequency(float freq)
     {
         return Mathf.RoundToInt(69 + 12 * Mathf.Log(freq / 440, 2));
+    }
+
+    public void ButtonClicked() {
+        SceneManager.LoadScene("setUp");
     }
 }
