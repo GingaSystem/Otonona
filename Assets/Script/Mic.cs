@@ -15,13 +15,15 @@ public class Mic : MonoBehaviour
     AudioSource aud; //マイクの音を読み取ったり内部再生する用
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips; //3オクターブ分のクリップを入れておく
-    public Slider slider;
-
-    public double minSound;
-
+    public AudioClip[] clips_interval;
+    public static double minSound = 0.05;
     private String lastNotename;
-
     private int n = 0;
+    public int lastNoteNumber;
+    private int otonosa;
+    public static bool toggleAbsOn = false;
+    public static bool toggleRelativeOn = true;
+
 
 
 
@@ -29,8 +31,6 @@ public class Mic : MonoBehaviour
     {
         aud = GetComponent<AudioSource>();
         text = GetComponentInChildren<Text>();
-        slider = GetComponentInChildren<Slider>();
-        //Debug.Log(slider.value);
         notename = new NoteNameDetector();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, 1, 44100);
@@ -38,8 +38,13 @@ public class Mic : MonoBehaviour
         //aud2.clip = clips[0];
         //aud2.Play();
         //aud.PlayOneShot(sound);
-
+        //minSound = slider.value;
+        //minSound = 0.05;
         text.text = "";
+
+
+        // Test
+        testCalcDegree();       
     }
 
     void Update()
@@ -73,12 +78,12 @@ public class Mic : MonoBehaviour
                 maxValue = val;
                 maxIndex = i;
                 // maxValue が最も大きい周波数成分の値で、
-                // maxIndex がそのインデックス。欲しいのはこっち。
+                // maxIndex がそのインデックス。
             }
         }
 
-        minSound = slider.value;
-        Debug.Log("Slider: "+ slider.value);
+        //minSound = slider.value;
+        Debug.Log("HomeMinSound: "+ minSound);
         Boolean isMuon = false;
         if (maxValue < minSound)
         {
@@ -94,25 +99,81 @@ public class Mic : MonoBehaviour
         try
         {
             String currentNoteName = notename.GetNoteName(freq,maxValue);
+            int currentNoteNumber = notename.calculateNoteNumberFromFrequency(freq)-48; //0から35の数字ならば3オクターブ内
             Debug.Log("notename" + currentNoteName);
 
-            if (lastNotename != currentNoteName) //lastNoteの音量がminSoundより小さかった時にも動かしたい
+            String appendText = "";
+            if ((lastNotename != currentNoteName) && toggleAbsOn) //絶対音感
             {
-                text.text = text.text + currentNoteName;
-                lastNotename = currentNoteName;
+                appendText = currentNoteName;
                 notename.soundPlay(freq, this, maxValue);
-                //freqに0が入ると例外が起こる
             }
+            if((lastNoteNumber != currentNoteNumber) && toggleRelativeOn){ //相対音感
+                //appendText = $"{currentNoteName} ({lastNoteNumber} -> {currentNoteNumber}), ";
+                appendText = currentNoteName;
+                otonosa = calcDegree(currentNoteNumber, lastNoteNumber); //otonosaは0〜35にする(3オクターブ対応) 
+                Debug.Log($"☆ {lastNoteNumber} -> {currentNoteNumber} (Δ{otonosa} deg.)");
+                lastNoteNumber = currentNoteNumber;
+                
+                if(otonosa>=36){otonosa = 2;}
+                notename.soundPlay2(freq, this, maxValue, otonosa);
+            }
+            if(appendText.Length != 0) {
+                text.text += appendText;
+            }
+
         }
         catch (Exception e)
         {
             Debug.Log(e);
         }
-
-
-
-
     }
+
+    int calcDegree(int to, int from){
+        // { "ド", "ド♯", "レ", "レ♯", "ミ", "ファ", "ファ♯", "ソ", "ソ♯", "ラ", "ラ♯", "シ" }; // -> 12
+        int[] distanceList = {1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6, 7};
+        int toNote = to % 12;
+        int fromNote = from % 12;
+
+        int distance = Math.Abs(distanceList[toNote] - distanceList[fromNote]) + 1;
+        int octaves = (int)Math.Abs(to - from) / 12;
+
+        return octaves * 7 + distance;
+    }
+
+    void testCalcDegree() {
+        //Debug.Assert(false);
+        //{ "ド", "ド♯", "レ", "レ♯", "ミ", "ファ", "ファ♯", "ソ", "ソ♯", "ラ", "ラ♯", "シ" };
+        Debug.Assert(calcDegree(0, 0) == 1);
+
+        Debug.Assert(calcDegree(0, 1) == 1);
+        Debug.Assert(calcDegree(1, 0) == 1);
+        Debug.Assert(calcDegree(0, 2) == 2);
+        Debug.Assert(calcDegree(2, 0) == 2);
+        Debug.Assert(calcDegree(0, 3) == 2);
+        Debug.Assert(calcDegree(3, 0) == 2);
+
+        Debug.Assert(calcDegree(1, 2) == 2);
+        Debug.Assert(calcDegree(2, 1) == 2);
+        Debug.Assert(calcDegree(1, 3) == 2);
+        Debug.Assert(calcDegree(3, 1) == 2);
+
+        Debug.Assert(calcDegree(2, 3) == 1);
+        Debug.Assert(calcDegree(3, 2) == 1);
+        Debug.Assert(calcDegree(3, 4) == 2);
+        Debug.Assert(calcDegree(4, 3) == 2);
+
+        Debug.Assert(calcDegree(0, 12) == 8);
+        Debug.Assert(calcDegree(12, 0) == 8);
+        Debug.Assert(calcDegree(0, 13) == 8);
+        Debug.Assert(calcDegree(13, 0) == 8);
+        Debug.Assert(calcDegree(0, 14) == 9);
+        Debug.Assert(calcDegree(14, 0) == 9);
+
+        Debug.Assert(calcDegree(2, 26) == 15);
+        Debug.Assert(calcDegree(26, 2) == 15);
+    }
+
     // 画面全体のスクリーンショットを保存する
     void CaptureScreenShot(string filePath)
     {
@@ -122,6 +183,9 @@ public class Mic : MonoBehaviour
     public void Clear()
     {
         text.text = "";
+    }
+    public void ButtonClicked() {
+        SceneManager.LoadScene("setUp");
     }
 
 }
@@ -158,7 +222,7 @@ public class NoteNameDetector
             Debug.Log("3オクターブ内 soundPlay freq: " + freq);
             var note = noteNumber - 48; //NoteNumberに48〜83の数字が入る。noteは0〜35(配列の要素36個)
             Debug.Log("3オクターブ内 soundPlay noteNumber: " + note);
-            mic.aud2.clip = mic.clips[note];
+            mic.aud2.clip = mic.clips[note]; 
             mic.aud2.Stop();
             mic.aud2.PlayOneShot(mic.aud2.clip);
             Debug.Log("soundPlay: " + noteNames[note]);
@@ -176,14 +240,20 @@ public class NoteNameDetector
         }
 
     }
+    public void soundPlay2(float freq, Mic mic, float maxValue, int otonosa){
+
+            mic.aud2.clip = mic.clips_interval[otonosa-1];
+            mic.aud2.Stop();
+            mic.aud2.PlayOneShot(mic.aud2.clip);
+            Debug.Log("soundPlay2: relative pitch " + otonosa);
+
+    }
 
     // See https://en.wikipedia.org/wiki/MIDI_tuning_standard
-    private int calculateNoteNumberFromFrequency(float freq)
+    public int calculateNoteNumberFromFrequency(float freq)
     {
         return Mathf.RoundToInt(69 + 12 * Mathf.Log(freq / 440, 2));
     }
 
-    public void ButtonClicked() {
-        SceneManager.LoadScene("setUp");
-    }
+    
 }
