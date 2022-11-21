@@ -4,10 +4,7 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-//todo
-//同じ音の連続でも無音が挟まった時にはもう一度歌う
-//音の追加
-//変化が大きかった部分に注目
+
 public class Mic : MonoBehaviour
 {
     private NoteNameDetector notename;
@@ -16,13 +13,13 @@ public class Mic : MonoBehaviour
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips; //3オクターブ分のクリップを入れておく
     public AudioClip[] clips_interval;
-    public static double minSound = 0.05;
-    private String lastNotename;
+    public static double minSound = 0.02;
+    private String lastNoteName;
     private int n = 0;
     public int lastNoteNumber;
     private int otonosa;
-    public static bool toggleAbsOn = false;
-    public static bool toggleRelativeOn = true;
+    public static bool toggleAbsOn = true;
+    public static bool toggleRelativeOn;
 
 
 
@@ -35,11 +32,6 @@ public class Mic : MonoBehaviour
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, 1, 44100);
         aud.Play();
-        //aud2.clip = clips[0];
-        //aud2.Play();
-        //aud.PlayOneShot(sound);
-        //minSound = slider.value;
-        //minSound = 0.05;
         text.text = "";
 
 
@@ -82,12 +74,10 @@ public class Mic : MonoBehaviour
             }
         }
 
-        //minSound = slider.value;
+       
         Debug.Log("HomeMinSound: "+ minSound);
-        Boolean isMuon = false;
         if (maxValue < minSound)
         {
-            isMuon = true;
             Debug.Log("無音: maxValue:" + maxValue);
             return;
         }
@@ -102,26 +92,34 @@ public class Mic : MonoBehaviour
             int currentNoteNumber = notename.calculateNoteNumberFromFrequency(freq)-48; //0から35の数字ならば3オクターブ内
             Debug.Log("notename" + currentNoteName);
 
-            String appendText = "";
-            if ((lastNotename != currentNoteName) && toggleAbsOn) //絶対音感
-            {
-                appendText = currentNoteName;
+            //String appendText = "";
+            if ((lastNoteName != currentNoteName)&&(lastNoteNumber != currentNoteNumber) && toggleAbsOn) //絶対音感
+            {   text.text += currentNoteName;
+                //appendText = currentNoteName;
+                lastNoteNumber = currentNoteNumber;
                 notename.soundPlay(freq, this, maxValue);
+                
+                
             }
+            
             if((lastNoteNumber != currentNoteNumber) && toggleRelativeOn){ //相対音感
                 //appendText = $"{currentNoteName} ({lastNoteNumber} -> {currentNoteNumber}), ";
-                appendText = currentNoteName;
+                //appendText = currentNoteName;
+                text.text += currentNoteName;
                 otonosa = calcDegree(currentNoteNumber, lastNoteNumber); //otonosaは0〜35にする(3オクターブ対応) 
                 Debug.Log($"☆ {lastNoteNumber} -> {currentNoteNumber} (Δ{otonosa} deg.)");
                 lastNoteNumber = currentNoteNumber;
                 
                 if(otonosa>=36){otonosa = 2;}
                 notename.soundPlay2(freq, this, maxValue, otonosa);
-            }
-            if(appendText.Length != 0) {
-                text.text += appendText;
-            }
+                
+               
 
+            }
+            /* if(appendText.Length != 0) {
+                text.text += appendText;
+            }*/
+           
         }
         catch (Exception e)
         {
