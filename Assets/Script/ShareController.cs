@@ -8,12 +8,14 @@ public class ShareController : MonoBehaviour
 {
     public GameObject button;
     public GameObject button2;
+    public GameObject button3;
 
     public void Share()
     {
         //スクリーンショットを撮る時ボタンを消したい
         button.SetActive(false);
         button2.SetActive(false);
+        button3.SetActive(false);
         StartCoroutine(_Share());
 
     }
@@ -38,6 +40,7 @@ public class ShareController : MonoBehaviour
                 Debug.Log("ボタン戻す");
                 button.SetActive(true);
                 button2.SetActive(true);
+                button3.SetActive(true);
                 break;
             }
 

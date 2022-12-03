@@ -13,7 +13,7 @@ public class Mic : MonoBehaviour
     public AudioSource aud2; //初音ミクの声を再生する
     public AudioClip[] clips; //3オクターブ分のクリップを入れておく
     public AudioClip[] clips_interval;
-    public static double minSound = 0.02;
+    public static double minSound = 0.01;
     private String lastNoteName;
     private int n = 0;
     public int lastNoteNumber;
@@ -54,7 +54,7 @@ public class Mic : MonoBehaviour
             GameObject sc = GameObject.Find("ShareController");
             sc.GetComponent<ShareController>().Share(); //ここなにやってるのだろ
         }
-        if (Time.frameCount % 10 != 0) { return; }
+        if (Time.frameCount % 5 != 0) { return; } //実行スピード調整
         Debug.Log("UPDATE!");
         float[] spectrum = new float[1024];
         aud.GetSpectrumData(spectrum, 0, FFTWindow.Rectangular);
